@@ -6,6 +6,7 @@
 import time
 import board
 import neopixel
+import adafruit_icm20x
 
 pixel_pin = board.A0
 num_pixels = 60
@@ -15,6 +16,9 @@ pixels = neopixel.NeoPixel(
 )
 
 pixel = neopixel.NeoPixel(board.NEOPIXEL, 1)
+
+i2c = board.I2C()
+icm =  adafruit_icm20x.ICM20649(i2c)
 
 BACK_LIGHT = list(range(55, 59))
 BACK_LIGHT.extend(list(range(0,18)))
@@ -39,8 +43,7 @@ MODE_CYCLE = 5
 MODE_WHEEL = 6
 MODE_VEHICLE = 7
 MODE_CALM_BREATHING = 8
-MODE = MODE_CALM_BREATHING
-
+MODE = MODE_WHEEL
 
 def colorwheel(pos):
     # Input a value 0 to 255 to get a color value.
@@ -94,8 +97,11 @@ def rainbow_wheel(wait):
         pixels.show()
         time.sleep(wait)
         pixel[0] = colorwheel(j)
-
-
+        
+        data = list(icm.acceleration)
+        data.extend(list(icm.gyro))
+        print(data)
+        
 while True:
     if MODE in [MODE_NUMBERS, MODE_LEFT, MODE_RIGHT, MODE_STOP, MODE_VEHICLE]:
         for i in range(num_pixels):
@@ -141,4 +147,6 @@ while True:
         breathe(0)
     elif MODE == MODE_CYCLE:
         rainbow_cycle(0)
+
+
 
